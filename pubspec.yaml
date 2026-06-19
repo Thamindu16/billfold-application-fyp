@@ -1,0 +1,36 @@
+name: fintellect
+description: "A Privacy-Aware Financial Statement Intelligence Assistant."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  
+  # State Management & MVVM 
+  provider: ^6.1.2
+
+  # Backend, Authentication & Database (Supabase)
+  supabase_flutter: ^2.8.0
+
+  # API Calls 
+  http: ^1.2.1
+
+  # Charts & UI Components 
+  fl_chart: ^0.66.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
