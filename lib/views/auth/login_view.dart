@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 // Connecting the Register screen so we can navigate to it when the user clicks Sign Up
 import 'register_view.dart';
 
+// Connecting the Dashboard screen so we can navigate to it upon successful login
+import '../dashboard/dashboard_view.dart';
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -286,32 +289,30 @@ class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
                               _buttonAnimationController
                                   .reverse(); // Bounces the button scale back to normal
                               if (_formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Processing Sign In...'),
+                                // Replaced validation SnackBar with strict route replacement navigation to Dashboard
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const DashboardView(),
                                   ),
                                 );
                               }
                             },
                             onTapCancel: () {
-                              _buttonAnimationController
-                                  .reverse(); // Safeguard to restore size if interaction is aborted
+                              _buttonAnimationController.reverse();
                             },
                             child: ScaleTransition(
                               scale: _buttonScaleAnimation,
                               child: Container(
                                 height: 54,
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF2F66F6,
-                                  ), // Fixed property name here
+                                  color: const Color(0xFF2F66F6),
                                   borderRadius: BorderRadius.circular(16),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF2F66F6)
-                                          .withOpacity(
-                                            0.3,
-                                          ), // Removed invalid const here
+                                      color: const Color(
+                                        0xFF2F66F6,
+                                      ).withOpacity(0.3),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
