@@ -1,6 +1,9 @@
 // Core Flutter package containing Material Design UI widgets like Buttons and TextFields
 import 'package:flutter/material.dart';
 
+// Connecting the Dashboard screen so we can navigate to it after successful registration
+import '../dashboard/dashboard_view.dart';
+
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -8,36 +11,29 @@ class RegisterView extends StatefulWidget {
   State<RegisterView> createState() => _RegisterViewState();
 }
 
-// Added TickerProviderStateMixin to handle smoothly running animations for the button
 class _RegisterViewState extends State<RegisterView>
     with TickerProviderStateMixin {
-  // GlobalKey handles form states and runs input validations collectively
   final _formKey = GlobalKey<FormState>();
 
-  // Separate text controllers to capture specific individual inputs independently
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // Visibility states for password fields to enhance user privacy control
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
 
-  // Animation controller and scale animation instance to drive the interactive button feedback
   late AnimationController _buttonAnimationController;
   late Animation<double> _buttonScaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    // Initializing the controller with a short duration for quick button press responsiveness
     _buttonAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    // Defining the scale boundaries from full size to slightly shrunk when pressed
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(
         parent: _buttonAnimationController,
@@ -48,7 +44,6 @@ class _RegisterViewState extends State<RegisterView>
 
   @override
   void dispose() {
-    // Explicitly killing controllers to free up device RAM and prevent app background lagging
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -60,12 +55,9 @@ class _RegisterViewState extends State<RegisterView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(
-        0xFF0F1A36,
-      ), // Deep dark blue background to match the theme
+      backgroundColor: const Color(0xFF0F1A36),
       body: Stack(
         children: [
-          // Background Art Decorative Circles to simulate the fluid design
           Positioned(
             top: -100,
             right: -50,
@@ -98,10 +90,8 @@ class _RegisterViewState extends State<RegisterView>
             ),
           ),
 
-          // Main Layout Content
           Column(
             children: [
-              // Top Section for the Premium Welcome text and Branding
               Expanded(
                 flex: 2,
                 child: SafeArea(
@@ -136,17 +126,14 @@ class _RegisterViewState extends State<RegisterView>
                 ),
               ),
 
-              // Bottom Section displaying the Curved White Floating Card for User Input
               Expanded(
                 flex: 6,
                 child: Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Colors.white, // Pure white surface for inputs
+                    color: Colors.white,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(
-                        36,
-                      ), // Creates the modern rounded layout top edge
+                      topLeft: Radius.circular(36),
                       topRight: Radius.circular(36),
                     ),
                   ),
@@ -157,7 +144,6 @@ class _RegisterViewState extends State<RegisterView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Full Name Input Field
                           const Text(
                             "Full Name",
                             style: TextStyle(
@@ -167,49 +153,13 @@ class _RegisterViewState extends State<RegisterView>
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(1.5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: TextFormField(
-                                controller: _nameController,
-                                keyboardType: TextInputType.name,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: const InputDecoration(
-                                  hintText: "Enter your full name",
-                                  prefixIcon: Icon(
-                                    Icons.person_outline,
-                                    color: Colors.grey,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
+                          _buildGradientField(
+                            _nameController,
+                            "Enter your full name",
+                            Icons.person_outline,
                           ),
                           const SizedBox(height: 16),
 
-                          // Email Input Field
                           const Text(
                             "Email Address",
                             style: TextStyle(
@@ -219,54 +169,13 @@ class _RegisterViewState extends State<RegisterView>
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(1.5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: TextFormField(
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: const InputDecoration(
-                                  hintText: "Enter your email",
-                                  prefixIcon: Icon(
-                                    Icons.email_outlined,
-                                    color: Colors.grey,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  if (!RegExp(
-                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                  ).hasMatch(value)) {
-                                    return 'Please enter a valid email address';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
+                          _buildGradientField(
+                            _emailController,
+                            "Enter your email",
+                            Icons.email_outlined,
                           ),
                           const SizedBox(height: 16),
 
-                          // Password Input Field
                           const Text(
                             "Password",
                             style: TextStyle(
@@ -276,65 +185,18 @@ class _RegisterViewState extends State<RegisterView>
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(1.5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: TextFormField(
-                                controller: _passwordController,
-                                obscureText: _isPasswordHidden,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  hintText: "Create a password",
-                                  prefixIcon: const Icon(
-                                    Icons.lock_outline,
-                                    color: Colors.grey,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _isPasswordHidden
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isPasswordHidden = !_isPasswordHidden;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a password';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
+                          _buildPasswordField(
+                            _passwordController,
+                            "Create a password",
+                            _isPasswordHidden,
+                            () {
+                              setState(
+                                () => _isPasswordHidden = !_isPasswordHidden,
+                              );
+                            },
                           ),
                           const SizedBox(height: 16),
 
-                          // Confirm Password Input Field
                           const Text(
                             "Confirm Password",
                             style: TextStyle(
@@ -344,85 +206,36 @@ class _RegisterViewState extends State<RegisterView>
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(1.5),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[100],
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: TextFormField(
-                                controller: _confirmPasswordController,
-                                obscureText: _isConfirmPasswordHidden,
-                                style: const TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  hintText: "Confirm your password",
-                                  prefixIcon: const Icon(
-                                    Icons.lock_clock_outlined,
-                                    color: Colors.grey,
-                                  ),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _isConfirmPasswordHidden
-                                          ? Icons.visibility_off_outlined
-                                          : Icons.visibility_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isConfirmPasswordHidden =
-                                            !_isConfirmPasswordHidden;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please confirm your password';
-                                  }
-                                  if (value != _passwordController.text) {
-                                    return 'Passwords do not match';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
+                          _buildPasswordField(
+                            _confirmPasswordController,
+                            "Confirm your password",
+                            _isConfirmPasswordHidden,
+                            () {
+                              setState(
+                                () => _isConfirmPasswordHidden =
+                                    !_isConfirmPasswordHidden,
+                              );
+                            },
                           ),
                           const SizedBox(height: 32),
 
-                          // Interactive Animated Button for modern tactile feedback
                           GestureDetector(
-                            onTapDown: (details) {
-                              _buttonAnimationController
-                                  .forward(); // Triggers the scale down animation
-                            },
-                            onTapUp: (details) {
-                              _buttonAnimationController
-                                  .reverse(); // Bounces the button scale back to normal
+                            onTapDown: (_) =>
+                                _buttonAnimationController.forward(),
+                            onTapUp: (_) {
+                              _buttonAnimationController.reverse();
                               if (_formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Processing Registration...'),
+                                // Directing the user to Dashboard after successful signup validation
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const DashboardView(),
                                   ),
                                 );
                               }
                             },
-                            onTapCancel: () {
-                              _buttonAnimationController.reverse();
-                            },
+                            onTapCancel: () =>
+                                _buttonAnimationController.reverse(),
                             child: ScaleTransition(
                               scale: _buttonScaleAnimation,
                               child: Container(
@@ -455,7 +268,6 @@ class _RegisterViewState extends State<RegisterView>
                           ),
                           const SizedBox(height: 28),
 
-                          // Navigation Link back to Login Screen
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -467,11 +279,7 @@ class _RegisterViewState extends State<RegisterView>
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(
-                                    context,
-                                  ); // Goes back to previous screen (LoginView)
-                                },
+                                onTap: () => Navigator.pop(context),
                                 child: const Text(
                                   "Sign In",
                                   style: TextStyle(
@@ -492,6 +300,91 @@ class _RegisterViewState extends State<RegisterView>
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper method for Name and Email fields
+  Widget _buildGradientField(
+    TextEditingController controller,
+    String hint,
+    IconData icon,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
+        ),
+      ),
+      padding: const EdgeInsets.all(1.5),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, color: Colors.grey),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+          ),
+          validator: (value) =>
+              (value == null || value.isEmpty) ? 'Required field' : null,
+        ),
+      ),
+    );
+  }
+
+  // Helper method for Password fields
+  Widget _buildPasswordField(
+    TextEditingController controller,
+    String hint,
+    bool isHidden,
+    VoidCallback toggle,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
+        ),
+      ),
+      padding: const EdgeInsets.all(1.5),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: TextFormField(
+          controller: controller,
+          obscureText: isHidden,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+            suffixIcon: IconButton(
+              icon: Icon(
+                isHidden
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: Colors.grey,
+              ),
+              onPressed: toggle,
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+          ),
+          validator: (value) =>
+              (value == null || value.isEmpty) ? 'Required field' : null,
+        ),
       ),
     );
   }
