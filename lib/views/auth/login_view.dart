@@ -11,7 +11,8 @@ class LoginView extends StatefulWidget {
   State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+// Added TickerProviderStateMixin to handle smoothly running animations for the button
+class _LoginViewState extends State<LoginView> with TickerProviderStateMixin {
   // GlobalKey is used to access and validate the Form state from anywhere in the widget tree
   final _formKey = GlobalKey<FormState>();
 
@@ -22,213 +23,356 @@ class _LoginViewState extends State<LoginView> {
   // State variable to toggle password visibility (True means Hidden, False means Visible)
   bool _isPasswordHidden = true;
 
+  // Animation controller and scale animation instance to drive the interactive button feedback
+  late AnimationController _buttonAnimationController;
+  late Animation<double> _buttonScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initializing the controller with a short duration for quick button press responsiveness
+    _buttonAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+    // Defining the scale boundaries from full size to slightly shrunk when pressed
+    _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(
+        parent: _buttonAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
   @override
   void dispose() {
     // Clean up memory. Disposing controllers prevents memory leaks when this screen is closed
     _emailController.dispose();
     _passwordController.dispose();
+    _buttonAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Colors.white, // Clean white background for modern UI design
-      body: SafeArea(
-        // SafeArea protects the UI from overlapping with phone notches or status bars
-        child: Center(
-          child: SingleChildScrollView(
-            // ScrollView prevents UI breaking or pixel overflow errors when the keyboard pops up
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      backgroundColor: const Color(
+        0xFF0F1A36,
+      ), // Deep dark blue background to match the theme
+      body: Stack(
+        children: [
+          // Background Art Decorative Circles to simulate the fluid design
+          Positioned(
+            top: -100,
+            right: -50,
             child: Container(
-              constraints: const BoxConstraints(
-                maxWidth: 400,
-              ), // Optimizes layout width for larger screens
-              child: Form(
-                key:
-                    _formKey, // Attaching the key to monitor form field validations
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // App Branding Title Section
-                    const Text(
-                      "Billfold",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blueAccent,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Welcome back! Sign in to manage your financial intelligence.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 15, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Email Input Header and Field
-                    const Text(
-                      "Email Address",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType
-                          .emailAddress, // Optimizes mobile keyboard with the @ symbol
-                      style: const TextStyle(color: Colors.black),
-                      decoration: InputDecoration(
-                        hintText: "Enter your email",
-                        prefixIcon: const Icon(
-                          Icons.email_outlined,
-                          color: Colors.grey,
-                        ), // Visual cue for Email
-                        filled: true,
-                        fillColor: Colors
-                            .grey[100], // Soft gray background for modern look
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide
-                              .none, // Removes default harsh black border
-                        ),
-                      ),
-                      // Validation logic triggered during form submission
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Password Input Header and Field
-                    const Text(
-                      "Password",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText:
-                          _isPasswordHidden, // Dynamic switching between dots and plain text
-                      style: const TextStyle(color: Colors.black),
-                      decoration: InputDecoration(
-                        hintText: "Enter your password",
-                        prefixIcon: const Icon(
-                          Icons.lock_outline,
-                          color: Colors.grey,
-                        ), // Visual cue for Password
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        suffixIcon: IconButton(
-                          // Toggles the eye icon based on whether password is shown or hidden
-                          icon: Icon(
-                            _isPasswordHidden
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordHidden =
-                                  !_isPasswordHidden; // Triggers UI re-render with new state
-                            });
-                          },
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Action Button Sign In
-                    SizedBox(
-                      height: 52,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        onPressed: () {
-                          // Validates all text fields inside the form before processing submission
-                          if (_formKey.currentState!.validate()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Processing Sign In...'),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text(
-                          "Sign In",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Navigation Link to Register Screen
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Don't have an account? ",
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            // Pushes RegisterView onto the screen stack cleanly (No const used here)
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RegisterView(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            "Sign Up",
-                            style: TextStyle(
-                              color: Colors.blueAccent,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blueAccent.withOpacity(0.4),
+                    Colors.transparent,
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
               ),
             ),
           ),
-        ),
+          Positioned(
+            top: 100,
+            left: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.blue.withOpacity(0.2),
+              ),
+            ),
+          ),
+
+          // Main Layout Content
+          Column(
+            children: [
+              // Top Section for the Premium Welcome text and Branding
+              Expanded(
+                flex: 3,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        const Text(
+                          "Welcome Back!",
+                          style: TextStyle(
+                            fontSize: 38,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Sign in to manage your financial intelligence and access your personalized wallet details.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white.withOpacity(0.7),
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom Section displaying the Curved White Floating Card for User Input
+              Expanded(
+                flex: 5,
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white, // Pure white surface for inputs
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(
+                        36,
+                      ), // Creates the modern rounded layout top edge
+                      topRight: Radius.circular(36),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(28.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 10),
+                          // Email Input Label
+                          const Text(
+                            "Email Address",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Container wrapping input field to deliver a premium linear gradient border
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(
+                              1.5,
+                            ), // Inner gap width acting as the visible border stroke
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                style: const TextStyle(color: Colors.black),
+                                decoration: const InputDecoration(
+                                  hintText: "Enter your email address",
+                                  prefixIcon: Icon(
+                                    Icons.email_outlined,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder
+                                      .none, // Suppressing default borders to showcase gradient
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your email';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Password Input Label
+                          const Text(
+                            "Password",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Container wrapping password field to deliver a premium linear gradient border
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(1.5),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: TextFormField(
+                                controller: _passwordController,
+                                obscureText: _isPasswordHidden,
+                                style: const TextStyle(color: Colors.black),
+                                decoration: InputDecoration(
+                                  hintText: "Enter your secure password",
+                                  prefixIcon: const Icon(
+                                    Icons.lock_outline,
+                                    color: Colors.grey,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(
+                                      _isPasswordHidden
+                                          ? Icons.visibility_off_outlined
+                                          : Icons.visibility_outlined,
+                                      color: Colors.grey,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _isPasswordHidden = !_isPasswordHidden;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your password';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+
+                          // Interactive Animated Button for modern tactile feedback
+                          GestureDetector(
+                            onTapDown: (details) {
+                              _buttonAnimationController
+                                  .forward(); // Triggers the scale down animation
+                            },
+                            onTapUp: (details) {
+                              _buttonAnimationController
+                                  .reverse(); // Bounces the button scale back to normal
+                              if (_formKey.currentState!.validate()) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Processing Sign In...'),
+                                  ),
+                                );
+                              }
+                            },
+                            onTapCancel: () {
+                              _buttonAnimationController
+                                  .reverse(); // Safeguard to restore size if interaction is aborted
+                            },
+                            child: ScaleTransition(
+                              scale: _buttonScaleAnimation,
+                              child: Container(
+                                height: 54,
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF2F66F6,
+                                  ), // Fixed property name here
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF2F66F6)
+                                          .withOpacity(
+                                            0.3,
+                                          ), // Removed invalid const here
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "Sign In",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 28),
+
+                          // Dynamic Navigation Footer link redirecting to Registration Page
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Don't have an account? ",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RegisterView(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                    color: Color(0xFF2F66F6),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
