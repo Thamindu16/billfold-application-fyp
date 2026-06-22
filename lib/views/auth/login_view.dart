@@ -1,4 +1,8 @@
+// Core Flutter package containing Material Design UI widgets like Buttons and TextFields
 import 'package:flutter/material.dart';
+
+// Connecting the Register screen so we can navigate to it when the user clicks Sign Up
+import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -8,13 +12,19 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
+  // GlobalKey is used to access and validate the Form state from anywhere in the widget tree
   final _formKey = GlobalKey<FormState>();
+
+  // Controllers to capture and retrieve text entered by the user in the input fields
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  // State variable to toggle password visibility (True means Hidden, False means Visible)
   bool _isPasswordHidden = true;
 
   @override
   void dispose() {
+    // Clean up memory. Disposing controllers prevents memory leaks when this screen is closed
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -23,30 +33,33 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Force explicit white background
+      backgroundColor:
+          Colors.white, // Clean white background for modern UI design
       body: SafeArea(
+        // SafeArea protects the UI from overlapping with phone notches or status bars
         child: Center(
           child: SingleChildScrollView(
+            // ScrollView prevents UI breaking or pixel overflow errors when the keyboard pops up
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Container(
               constraints: const BoxConstraints(
                 maxWidth: 400,
-              ), // Perfect for Web/Tab view
+              ), // Optimizes layout width for larger screens
               child: Form(
-                key: _formKey,
+                key:
+                    _formKey, // Attaching the key to monitor form field validations
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment:
-                      CrossAxisAlignment.stretch, // Stretch buttons nicely
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // App Branding Section
+                    // App Branding Title Section
                     const Text(
                       "Billfold",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 40,
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueAccent, // Fallback safe color
+                        color: Colors.blueAccent,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -55,9 +68,9 @@ class _LoginViewState extends State<LoginView> {
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 15, color: Colors.grey),
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 32),
 
-                    // Email Input Field
+                    // Email Input Header and Field
                     const Text(
                       "Email Address",
                       style: TextStyle(
@@ -69,21 +82,25 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType
+                          .emailAddress, // Optimizes mobile keyboard with the @ symbol
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         hintText: "Enter your email",
                         prefixIcon: const Icon(
                           Icons.email_outlined,
                           color: Colors.grey,
-                        ),
+                        ), // Visual cue for Email
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: Colors
+                            .grey[100], // Soft gray background for modern look
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide
+                              .none, // Removes default harsh black border
                         ),
                       ),
+                      // Validation logic triggered during form submission
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
@@ -91,9 +108,9 @@ class _LoginViewState extends State<LoginView> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
-                    // Password Input Field
+                    // Password Input Header and Field
                     const Text(
                       "Password",
                       style: TextStyle(
@@ -105,14 +122,15 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: _isPasswordHidden,
+                      obscureText:
+                          _isPasswordHidden, // Dynamic switching between dots and plain text
                       style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         hintText: "Enter your password",
                         prefixIcon: const Icon(
                           Icons.lock_outline,
                           color: Colors.grey,
-                        ),
+                        ), // Visual cue for Password
                         filled: true,
                         fillColor: Colors.grey[100],
                         border: OutlineInputBorder(
@@ -120,6 +138,7 @@ class _LoginViewState extends State<LoginView> {
                           borderSide: BorderSide.none,
                         ),
                         suffixIcon: IconButton(
+                          // Toggles the eye icon based on whether password is shown or hidden
                           icon: Icon(
                             _isPasswordHidden
                                 ? Icons.visibility_off_outlined
@@ -128,7 +147,8 @@ class _LoginViewState extends State<LoginView> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _isPasswordHidden = !_isPasswordHidden;
+                              _isPasswordHidden =
+                                  !_isPasswordHidden; // Triggers UI re-render with new state
                             });
                           },
                         ),
@@ -142,7 +162,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Login Button (Standalone styling)
+                    // Action Button Sign In
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(
@@ -155,10 +175,11 @@ class _LoginViewState extends State<LoginView> {
                           elevation: 0,
                         ),
                         onPressed: () {
+                          // Validates all text fields inside the form before processing submission
                           if (_formKey.currentState!.validate()) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Processing Login Data...'),
+                                content: Text('Processing Sign In...'),
                               ),
                             );
                           }
@@ -174,7 +195,7 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Navigation to Register Screen
+                    // Navigation Link to Register Screen
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -184,7 +205,13 @@ class _LoginViewState extends State<LoginView> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            // Navigation logic later
+                            // Pushes RegisterView onto the screen stack cleanly (No const used here)
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RegisterView(),
+                              ),
+                            );
                           },
                           child: const Text(
                             "Sign Up",
