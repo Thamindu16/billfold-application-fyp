@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-// Importing using your exact filename 'chat_view.dart' to fix the error
+// Importing the correct official file selector package
+import 'package:file_selector/file_selector.dart';
 import '../chat/chat_view.dart';
 
 class DashboardView extends StatefulWidget {
@@ -10,7 +11,8 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
-  // Mock list simulating documents fetched from the database
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final List<Map<String, dynamic>> _uploadedDocs = [
     {
       'name': 'HNB_Statement_Jan.pdf',
@@ -20,29 +22,130 @@ class _DashboardViewState extends State<DashboardView> {
     {'name': 'Slip_Pay_2026.pdf', 'type': 'Payslip', 'date': 'Yesterday'},
   ];
 
+  // Updated function using official file_selector package syntax
+  Future<void> _pickPDFDocument() async {
+    try {
+      const XTypeGroup typeGroup = XTypeGroup(
+        label: 'PDFs',
+        extensions: <String>['pdf'],
+      );
+
+      // Open file picker securely
+      final XFile? file = await openFile(
+        acceptedTypeGroups: <XTypeGroup>[typeGroup],
+      );
+
+      if (file != null) {
+        String fileName = file.name;
+
+        setState(() {
+          _uploadedDocs.insert(0, {
+            'name': fileName,
+            'type': 'Uploaded Statement',
+            'date': 'Just Now',
+          });
+        });
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Successfully imported: $fileName"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Failed to pick document. Try again."),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1A36), // Deep navy background theme
-      // Sidebar drawer menu accessible from the top-left corner
+      key: _scaffoldKey,
+      backgroundColor: const Color(0xFF0F1A36),
       drawer: Drawer(
         child: Container(
           color: const Color(0xFF0F1A36),
-          child: const Center(
-            child: Text(
-              "Sidebar Menu",
-              style: TextStyle(color: Colors.white, fontSize: 18),
-            ),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              const DrawerHeader(
+                decoration: BoxDecoration(color: Color(0xFF1E2A4A)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: Color(0xFF2F66F6),
+                      child: Icon(Icons.person, color: Colors.white, size: 35),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      "BILLFOLD User",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Premium Tier Plan",
+                      style: TextStyle(color: Colors.greenAccent, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.dashboard, color: Colors.white70),
+                title: const Text(
+                  "Dashboard Overview",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () => Navigator.pop(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.chat_bubble, color: Colors.white70),
+                title: const Text(
+                  "AI Assistant Chat",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AiChatView()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.folder_open, color: Colors.white70),
+                title: const Text(
+                  "Document Locker",
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
           ),
         ),
       ),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F1A36),
         elevation: 0,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ), // Colors the hamburger icon white
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        ),
         title: const Text(
           "BILLFOLD",
           style: TextStyle(
@@ -51,17 +154,6 @@ class _DashboardViewState extends State<DashboardView> {
             fontSize: 20,
           ),
         ),
-        actions: [
-          // Profile icon button on the top right
-          IconButton(
-            icon: const Icon(
-              Icons.account_circle,
-              color: Colors.white70,
-              size: 28,
-            ),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -69,11 +161,8 @@ class _DashboardViewState extends State<DashboardView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top greeting banner widget
             _buildWelcomeCard(),
             const SizedBox(height: 24),
-
-            // Document Upload UI section header
             const Text(
               "Upload Statements",
               style: TextStyle(
@@ -85,8 +174,6 @@ class _DashboardViewState extends State<DashboardView> {
             const SizedBox(height: 12),
             _buildUploadZone(),
             const SizedBox(height: 24),
-
-            // Financial breakdown section header
             const Text(
               "Extracted Overview",
               style: TextStyle(
@@ -98,8 +185,6 @@ class _DashboardViewState extends State<DashboardView> {
             const SizedBox(height: 12),
             _buildInsightMiniChart(),
             const SizedBox(height: 24),
-
-            // Processed document archive list header
             const Text(
               "Processed Documents",
               style: TextStyle(
@@ -113,17 +198,14 @@ class _DashboardViewState extends State<DashboardView> {
           ],
         ),
       ),
-
-      // Floating button that redirects user to the AI Chat screen
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigates safely to AiChatView since the correct file is imported above
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AiChatView()),
           );
         },
-        backgroundColor: const Color(0xFF2F66F6), // Accent theme blue
+        backgroundColor: const Color(0xFF2F66F6),
         icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
         label: const Text(
           "Ask Assistant",
@@ -133,7 +215,6 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
-  // Builder widget for the greeting and privacy disclosure banner
   Widget _buildWelcomeCard() {
     return Container(
       width: double.infinity,
@@ -141,20 +222,18 @@ class _DashboardViewState extends State<DashboardView> {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF2F66F6), Color(0xFF1A44B3)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Hello User 👋",
             style: TextStyle(color: Colors.white70, fontSize: 16),
           ),
-          const SizedBox(height: 6),
-          const Text(
+          SizedBox(height: 6),
+          Text(
             "Privacy-Safe Financial Intelligence",
             style: TextStyle(
               color: Colors.white,
@@ -162,21 +241,11 @@ class _DashboardViewState extends State<DashboardView> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            "Upload your personal bank statements or payslips. Our local AI will analyze them securely without cloud data exposure.",
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.75),
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
         ],
       ),
     );
   }
 
-  // Builder widget for the interactive PDF file drop zone
   Widget _buildUploadZone() {
     return Container(
       width: double.infinity,
@@ -190,9 +259,7 @@ class _DashboardViewState extends State<DashboardView> {
         ),
       ),
       child: InkWell(
-        onTap: () {
-          // File picking logic goes here in future updates
-        },
+        onTap: _pickPDFDocument,
         borderRadius: BorderRadius.circular(16),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -210,18 +277,12 @@ class _DashboardViewState extends State<DashboardView> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: 4),
-            Text(
-              "Supports Bank Statements, Payslips & Budgets",
-              style: TextStyle(color: Colors.white54, fontSize: 12),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Builder widget displaying basic dynamic extractions (Income vs Expense summaries)
   Widget _buildInsightMiniChart() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -240,7 +301,6 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
-  // Helper template method to structure single financial data boxes smoothly
   Widget _buildInsightStat(String title, String amount, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,7 +322,6 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
-  // Builder widget rendering the dynamic file rows underneath the dashboard
   Widget _buildDocumentList() {
     return ListView.builder(
       shrinkWrap: true,
@@ -294,14 +353,6 @@ class _DashboardViewState extends State<DashboardView> {
               "${doc['type']} • ${doc['date']}",
               style: const TextStyle(color: Colors.white54, fontSize: 12),
             ),
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.white30,
-              size: 14,
-            ),
-            onTap: () {
-              // Action logic for clicking individual files will map here
-            },
           ),
         );
       },
