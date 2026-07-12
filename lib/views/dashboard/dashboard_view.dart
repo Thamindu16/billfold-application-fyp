@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 // Importing the correct official file selector package
 import 'package:file_selector/file_selector.dart';
 import '../chat/chat_view.dart';
+// Document Locker එකට navigate කරන්න මේක import කරන්න ඕනේ
+import '../document/document_locker_view.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -133,7 +135,16 @@ class _DashboardViewState extends State<DashboardView> {
                   "Document Locker",
                   style: TextStyle(color: Colors.white),
                 ),
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  // Drawer එක වහලා කෙලින්ම Document Locker ස්ක්‍රීන් එකට යනවා
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DocumentLockerView(),
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -215,6 +226,7 @@ class _DashboardViewState extends State<DashboardView> {
     );
   }
 
+  // ඔයා රවුම් කරපු තැනට දාපු අලුත් Premium Text/Description Card එක
   Widget _buildWelcomeCard() {
     return Container(
       width: double.infinity,
@@ -228,18 +240,34 @@ class _DashboardViewState extends State<DashboardView> {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 18),
+              SizedBox(width: 8),
+              Text(
+                "INTELLIGENT VAULT",
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
           Text(
-            "Hello User 👋",
-            style: TextStyle(color: Colors.white70, fontSize: 16),
+            "Secure Financial Hub",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 6),
           Text(
-            "Privacy-Safe Financial Intelligence",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            "Analyze statements locally and safeguard your sensitive data with premium end-to-end sandbox protection.",
+            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
         ],
       ),

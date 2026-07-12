@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // Connecting the Register screen so we can navigate to it when the user clicks Sign Up
 import 'register_view.dart';
 
-// Connecting the Dashboard screen so we can navigate to it upon successful login
+// Corrected relative import path to point accurately towards the Dashboard view configuration file
 import '../dashboard/dashboard_view.dart';
 
 class LoginView extends StatefulWidget {

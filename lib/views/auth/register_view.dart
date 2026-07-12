@@ -13,27 +13,33 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView>
     with TickerProviderStateMixin {
+  // GlobalKey is used to access and validate the Form state from anywhere in the widget tree
   final _formKey = GlobalKey<FormState>();
 
+  // Controllers to capture and retrieve text entered by the user in the registration input fields
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  // State variables to toggle password visibility (True means Hidden, False means Visible)
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
 
+  // Animation controller and scale animation instance to drive the interactive button feedback
   late AnimationController _buttonAnimationController;
   late Animation<double> _buttonScaleAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Initializing the controller with a short duration for quick button press responsiveness
     _buttonAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
+    // Defining the scale boundaries from full size to slightly shrunk when pressed
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(
         parent: _buttonAnimationController,
@@ -44,6 +50,7 @@ class _RegisterViewState extends State<RegisterView>
 
   @override
   void dispose() {
+    // Clean up memory. Disposing controllers prevents memory leaks when this screen is closed
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -55,9 +62,12 @@ class _RegisterViewState extends State<RegisterView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F1A36),
+      backgroundColor: const Color(
+        0xFF0F1A36,
+      ), // Deep dark blue background to match the theme
       body: Stack(
         children: [
+          // Background Art Decorative Circles to simulate the fluid design
           Positioned(
             top: -100,
             right: -50,
@@ -90,8 +100,10 @@ class _RegisterViewState extends State<RegisterView>
             ),
           ),
 
+          // Main Layout Content
           Column(
             children: [
+              // Top Section for the Premium Welcome text and Branding
               Expanded(
                 flex: 2,
                 child: SafeArea(
@@ -126,14 +138,17 @@ class _RegisterViewState extends State<RegisterView>
                 ),
               ),
 
+              // Bottom Section displaying the Curved White Floating Card for User Input
               Expanded(
                 flex: 6,
                 child: Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.white, // Pure white surface for inputs
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(36),
+                      topLeft: Radius.circular(
+                        36,
+                      ), // Creates the modern rounded layout top edge
                       topRight: Radius.circular(36),
                     ),
                   ),
@@ -144,6 +159,7 @@ class _RegisterViewState extends State<RegisterView>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Full Name Input Label
                           const Text(
                             "Full Name",
                             style: TextStyle(
@@ -160,6 +176,7 @@ class _RegisterViewState extends State<RegisterView>
                           ),
                           const SizedBox(height: 16),
 
+                          // Email Address Input Label
                           const Text(
                             "Email Address",
                             style: TextStyle(
@@ -176,6 +193,7 @@ class _RegisterViewState extends State<RegisterView>
                           ),
                           const SizedBox(height: 16),
 
+                          // Password Input Label
                           const Text(
                             "Password",
                             style: TextStyle(
@@ -197,6 +215,7 @@ class _RegisterViewState extends State<RegisterView>
                           ),
                           const SizedBox(height: 16),
 
+                          // Confirm Password Input Label
                           const Text(
                             "Confirm Password",
                             style: TextStyle(
@@ -219,11 +238,13 @@ class _RegisterViewState extends State<RegisterView>
                           ),
                           const SizedBox(height: 32),
 
+                          // Interactive Animated Button for modern tactile feedback
                           GestureDetector(
-                            onTapDown: (_) =>
-                                _buttonAnimationController.forward(),
+                            onTapDown: (_) => _buttonAnimationController
+                                .forward(), // Triggers the scale down animation
                             onTapUp: (_) {
-                              _buttonAnimationController.reverse();
+                              _buttonAnimationController
+                                  .reverse(); // Bounces the button scale back to normal
                               if (_formKey.currentState!.validate()) {
                                 // Directing the user to Dashboard after successful signup validation
                                 Navigator.pushReplacement(
@@ -268,6 +289,7 @@ class _RegisterViewState extends State<RegisterView>
                           ),
                           const SizedBox(height: 28),
 
+                          // Dynamic Navigation Footer link redirecting back to Login Page
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -304,7 +326,7 @@ class _RegisterViewState extends State<RegisterView>
     );
   }
 
-  // Helper method for Name and Email fields
+  // Helper method for Name and Email fields to ensure premium linear gradient border layout
   Widget _buildGradientField(
     TextEditingController controller,
     String hint,
@@ -317,7 +339,9 @@ class _RegisterViewState extends State<RegisterView>
           colors: [Color(0xFF2F66F6), Color(0xFF8A2387)],
         ),
       ),
-      padding: const EdgeInsets.all(1.5),
+      padding: const EdgeInsets.all(
+        1.5,
+      ), // Inner gap width acting as the visible border stroke
       child: Container(
         decoration: BoxDecoration(
           color: Colors.grey[100],
@@ -325,10 +349,14 @@ class _RegisterViewState extends State<RegisterView>
         ),
         child: TextFormField(
           controller: controller,
+          style: const TextStyle(
+            color: Colors.black,
+          ), // Ensures text is readable against the grey surface
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, color: Colors.grey),
-            border: InputBorder.none,
+            border: InputBorder
+                .none, // Suppressing default borders to showcase gradient
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
@@ -341,7 +369,7 @@ class _RegisterViewState extends State<RegisterView>
     );
   }
 
-  // Helper method for Password fields
+  // Helper method for Password fields supporting visibility toggling
   Widget _buildPasswordField(
     TextEditingController controller,
     String hint,
@@ -364,6 +392,7 @@ class _RegisterViewState extends State<RegisterView>
         child: TextFormField(
           controller: controller,
           obscureText: isHidden,
+          style: const TextStyle(color: Colors.black),
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
