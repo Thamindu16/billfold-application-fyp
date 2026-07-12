@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-// VIVA INFO: Changed to a standard view class that can be called safely without strict const mismatch
 class AiChatView extends StatefulWidget {
-  // Added a proper nullable key constructor to allow flexible navigation from Dashboard
-  const AiChatView({Key? key}) : super(key: key);
+  // Updated to modern Flutter key constructor syntax
+  const AiChatView({super.key});
 
   @override
   State<AiChatView> createState() => _AiChatViewState();
@@ -12,6 +11,9 @@ class AiChatView extends StatefulWidget {
 class _AiChatViewState extends State<AiChatView> {
   // Controller to handle and clear the text input field
   final TextEditingController _chatController = TextEditingController();
+
+  // ScrollController to automatically scroll down when new messages arrive
+  final ScrollController _scrollController = ScrollController();
 
   // Hardcoded chat history to simulate real AI conversation with data citations
   final List<Map<String, dynamic>> _messages = [
@@ -39,24 +41,57 @@ class _AiChatViewState extends State<AiChatView> {
     },
   ];
 
-  // Function to add user's typed message to the list and refresh the screen
+  // Function to add user's typed message and trigger a simulated local AI response
   void _sendMessage() {
-    if (_chatController.text.trim().isEmpty) return; // Stop if input is empty
+    final String userText = _chatController.text.trim();
+    if (userText.isEmpty) return; // Stop if input is empty
+
     setState(() {
       _messages.add({
         'isUser': true,
-        'text': _chatController.text,
+        'text': userText,
         'hasCitation': false,
         'citation': '',
       });
       _chatController.clear(); // Clear input field after sending
     });
+
+    _scrollToBottom();
+
+    // Simulating Local AI response delay (Since we don't have a backend yet)
+    Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+      setState(() {
+        _messages.add({
+          'isUser': false,
+          'text':
+              'I am currently processing your query locally. Once the core extraction engine is fully connected, I will parse your files to answer: "$userText"',
+          'hasCitation': true,
+          'citation': 'Local Sandbox Engine • Secure Context Session',
+        });
+      });
+      _scrollToBottom();
+    });
   }
 
-  // Clean up the text controller when leaving the screen to prevent memory leaks
+  // Automatically scrolls the list view to the latest message smoothly
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  // Clean up controllers when leaving the screen to prevent memory leaks
   @override
   void dispose() {
     _chatController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -102,6 +137,7 @@ class _AiChatViewState extends State<AiChatView> {
           // Expanded list area that automatically scrolls and displays chat messages
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.all(16),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
@@ -128,7 +164,7 @@ class _AiChatViewState extends State<AiChatView> {
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: FractionallySizedBox(
         widthFactor:
-            0.75, // Safely caps the chat bubble width to 75% of screen width without context errors
+            0.75, // Safely caps the chat bubble width to 75% of screen width
         child: Container(
           margin: const EdgeInsets.only(bottom: 16),
           child: Column(
@@ -153,7 +189,7 @@ class _AiChatViewState extends State<AiChatView> {
                     topRight: const Radius.circular(16),
                     bottomLeft: Radius.circular(
                       isUser ? 16 : 0,
-                    ), // Sharp corner logic for left/right side
+                    ), // Sharp corner logic
                     bottomRight: Radius.circular(isUser ? 0 : 16),
                   ),
                 ),
@@ -167,7 +203,7 @@ class _AiChatViewState extends State<AiChatView> {
                 ),
               ),
               // Conditional button: Renders only if the AI response has a source citation
-              if (msg['hasCitation']) ...[
+              if (msg['hasCitation'] == true) ...[
                 const SizedBox(height: 4),
                 GestureDetector(
                   onTap: () {
@@ -231,6 +267,8 @@ class _AiChatViewState extends State<AiChatView> {
                 child: TextField(
                   controller: _chatController,
                   style: const TextStyle(color: Colors.white),
+                  onSubmitted: (_) =>
+                      _sendMessage(), // Allows sending via keyboard 'Enter'
                   decoration: const InputDecoration(
                     hintText: "Ask about your statements...",
                     hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
