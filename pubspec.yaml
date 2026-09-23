@@ -1,4 +1,4 @@
-name: fintellect
+name: Billfold
 description: "A Privacy-Aware Financial Statement Intelligence Assistant."
 publish_to: 'none'
 
@@ -11,21 +11,26 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # UI Styling & Fonts
   cupertino_icons: ^1.0.8
+  google_fonts: ^6.1.0
 
-  
-  # State Management & MVVM 
+  # State Management & MVVM
   provider: ^6.1.2
 
   # Backend, Authentication & Database (Supabase)
   supabase_flutter: ^2.8.0
 
-  # API Calls 
+  # Local Biometric Authentication (Face ID / Touch ID)
+  local_auth: ^2.1.8
+
+  # API Calls
   http: ^1.2.1
 
-  # Charts & UI Components 
+  # Charts & File Handling
   fl_chart: ^0.66.0
   file_selector: ^1.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
