@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../core/utils/page_transitions.dart';
+import 'otp_request_view.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -16,8 +18,17 @@ class _RegisterViewState extends State<RegisterView> {
 
   void _handleRegister() {
     if (_formKey.currentState!.validate()) {
-      // Registration logic
+      Navigator.push(context, SlideFadeRoute(page: const OtpRequestView()));
     }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,7 +57,6 @@ class _RegisterViewState extends State<RegisterView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Logo Icon
                     Container(
                       width: 64,
                       height: 64,
@@ -72,7 +82,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     const Text(
                       'BILLFOLD',
                       style: TextStyle(
@@ -83,7 +92,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 32),
-
                     const Text(
                       'Create Account',
                       style: TextStyle(
@@ -93,14 +101,11 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-
                     const Text(
                       'Start managing your private workspace.',
                       style: TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
                     ),
                     const SizedBox(height: 36),
-
-                    // Full Name Field
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -165,8 +170,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Email Field
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -236,8 +239,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Password Field
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -306,8 +307,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Confirm Password Field
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -376,8 +375,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // Sign Up Button
                     Container(
                       width: double.infinity,
                       height: 52,
@@ -416,8 +413,6 @@ class _RegisterViewState extends State<RegisterView> {
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // Back to Login Redirect
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

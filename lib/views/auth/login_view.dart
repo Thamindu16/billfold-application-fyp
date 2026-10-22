@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/utils/page_transitions.dart';
 import 'forgot_password_view.dart';
+import 'otp_request_view.dart';
 import 'register_view.dart';
 
 class LoginView extends StatefulWidget {
@@ -17,8 +18,15 @@ class _LoginViewState extends State<LoginView> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      // Login logic
+      Navigator.push(context, SlideFadeRoute(page: const OtpRequestView()));
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -47,7 +55,6 @@ class _LoginViewState extends State<LoginView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Logo Icon
                     Container(
                       width: 64,
                       height: 64,
@@ -73,8 +80,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-
-                    // Brand Title
                     const Text(
                       'BILLFOLD',
                       style: TextStyle(
@@ -85,8 +90,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 32),
-
-                    // Header
                     const Text(
                       'Welcome back',
                       textAlign: TextAlign.center,
@@ -98,8 +101,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 12),
-
-                    // Subtitle
                     const Text(
                       'Sign in to your private financial Workspace.\nYour data stays on this device.',
                       textAlign: TextAlign.center,
@@ -110,8 +111,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 36),
-
-                    // Email Label & Field
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -181,8 +180,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Password Label & Field
                     const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -248,8 +245,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Forgot Password
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -267,8 +262,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // Sign In Button
                     Container(
                       width: double.infinity,
                       height: 52,
@@ -307,8 +300,6 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // Sign Up Nav Link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
