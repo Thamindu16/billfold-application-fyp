@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-// Importing the correct official file selector package
-import 'package:file_selector/file_selector.dart';
-import '../chat/chat_view.dart';
-// Document Locker එකට navigate කරන්න මේක import කරන්න ඕනේ
-import '../document/document_locker_view.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -13,377 +8,559 @@ class DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<DashboardView> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _currentIndex = 0;
 
-  final List<Map<String, dynamic>> _uploadedDocs = [
+  double totalIncome = 145000.0;
+  double totalExpense = 68200.0;
+
+  List<Map<String, String>> processedDocuments = [
     {
-      'name': 'HNB_Statement_Jan.pdf',
-      'type': 'Bank Statement',
-      'date': 'Today',
+      'title': 'HNB_Statement_Jan.pdf',
+      'subtitle': 'Bank statement · Today',
+      'status': 'Encrypted',
     },
-    {'name': 'Slip_Pay_2026.pdf', 'type': 'Payslip', 'date': 'Yesterday'},
+    {
+      'title': 'Slip_Pay_2026.pdf',
+      'subtitle': 'Payslip · Yesterday',
+      'status': 'Encrypted',
+    },
   ];
 
-  // Updated function using official file_selector package syntax
-  Future<void> _pickPDFDocument() async {
-    try {
-      const XTypeGroup typeGroup = XTypeGroup(
-        label: 'PDFs',
-        extensions: <String>['pdf'],
-      );
+  void _onUploadPDF() {
+    setState(() {
+      totalIncome += 25000.0;
+      totalExpense += 5000.0;
+      processedDocuments.insert(0, {
+        'title': 'New_Statement_${DateTime.now().day}.pdf',
+        'subtitle': 'Bank statement · Just now',
+        'status': 'Encrypted',
+      });
+    });
+  }
 
-      // Open file picker securely
-      final XFile? file = await openFile(
-        acceptedTypeGroups: <XTypeGroup>[typeGroup],
-      );
-
-      if (file != null) {
-        String fileName = file.name;
-
-        setState(() {
-          _uploadedDocs.insert(0, {
-            'name': fileName,
-            'type': 'Uploaded Statement',
-            'date': 'Just Now',
-          });
-        });
-
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Successfully imported: $fileName"),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Failed to pick document. Try again."),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    }
+  void _navigateToPage(String pageTitle) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlaceholderPage(title: pageTitle),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFF0F1A36),
       drawer: Drawer(
-        child: Container(
-          color: const Color(0xFF0F1A36),
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(color: Color(0xFF1E2A4A)),
+        backgroundColor: const Color(0xFF151D2A),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Text(
+                'BILLFOLD Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_outline, color: Colors.white),
+              title: const Text(
+                'Profile',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _navigateToPage('Profile');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.folder_outlined, color: Colors.white),
+              title: const Text(
+                'Locker',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 1);
+                _navigateToPage('Document Locker');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined, color: Colors.white),
+              title: const Text(
+                'Settings',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 2);
+                _navigateToPage('Settings');
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0B1120), Color(0xFF151D2A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Builder(
+            builder: (context) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: 30,
-                      backgroundColor: Color(0xFF2F66F6),
-                      child: Icon(Icons.person, color: Colors.white, size: 35),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.menu, color: Colors.white),
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                        ),
+                        const Text(
+                          'BILLFOLD',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2.5,
+                            color: Colors.white,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            _navigateToPage('Profile');
+                          },
+                          child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFF2563EB,
+                                  ).withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'TP',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      "BILLFOLD User",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withOpacity(0.35),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(
+                                Icons.auto_awesome,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                'INTELLIGENT VAULT',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Secure financial hub',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Statements are analyzed on a private server and encrypted end to end. Nothing is shared with third parties.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              height: 1.4,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      "Premium Tier Plan",
-                      style: TextStyle(color: Colors.greenAccent, fontSize: 12),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Upload statements',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: _onUploadPDF,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E293B).withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFF334155)),
+                        ),
+                        child: Column(
+                          children: const [
+                            Icon(
+                              Icons.cloud_upload_outlined,
+                              color: Color(0xFF3B82F6),
+                              size: 32,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              'Tap to upload PDF statement',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Bank statements, payslips, or budgets',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF94A3B8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFF334155),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Total income',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'LKR ${totalIncome.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF4ADE80),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFF334155),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Total expense',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF94A3B8),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'LKR ${totalExpense.toStringAsFixed(0)}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFF87171),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Processed documents',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: processedDocuments.length,
+                      itemBuilder: (context, index) {
+                        final doc = processedDocuments[index];
+                        return GestureDetector(
+                          onTap: () {
+                            _navigateToPage('PDF Overview: ${doc['title']}');
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFF334155),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF2563EB,
+                                    ).withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.insert_drive_file_outlined,
+                                    color: Color(0xFF3B82F6),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        doc['title']!,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        doc['subtitle']!,
+                                        style: const TextStyle(
+                                          color: Color(0xFF94A3B8),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF10B981,
+                                    ).withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    doc['status']!,
+                                    style: const TextStyle(
+                                      color: Color(0xFF34D399),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.dashboard, color: Colors.white70),
-                title: const Text(
-                  "Dashboard Overview",
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () => Navigator.pop(context),
-              ),
-              ListTile(
-                leading: const Icon(Icons.chat_bubble, color: Colors.white70),
-                title: const Text(
-                  "AI Assistant Chat",
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AiChatView()),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.folder_open, color: Colors.white70),
-                title: const Text(
-                  "Document Locker",
-                  style: TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  // Drawer එක වහලා කෙලින්ම Document Locker ස්ක්‍රීන් එකට යනවා
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DocumentLockerView(),
-                    ),
-                  );
-                },
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0F1A36),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        title: const Text(
-          "BILLFOLD",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildWelcomeCard(),
-            const SizedBox(height: 24),
-            const Text(
-              "Upload Statements",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildUploadZone(),
-            const SizedBox(height: 24),
-            const Text(
-              "Extracted Overview",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildInsightMiniChart(),
-            const SizedBox(height: 24),
-            const Text(
-              "Processed Documents",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildDocumentList(),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AiChatView()),
-          );
+          _navigateToPage('AI Assistant Chat');
         },
-        backgroundColor: const Color(0xFF2F66F6),
-        icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-        label: const Text(
-          "Ask Assistant",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  // ඔයා රවුම් කරපු තැනට දාපු අලුත් Premium Text/Description Card එක
-  Widget _buildWelcomeCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2F66F6), Color(0xFF1A44B3)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.auto_awesome, color: Colors.cyanAccent, size: 18),
-              SizedBox(width: 8),
-              Text(
-                "INTELLIGENT VAULT",
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
-                ),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF2563EB).withOpacity(0.4),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          SizedBox(height: 8),
-          Text(
-            "Secure Financial Hub",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+          child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          if (index == 1) {
+            _navigateToPage('Document Locker');
+          } else if (index == 2) {
+            _navigateToPage('Settings');
+          }
+        },
+        backgroundColor: const Color(0xFF0B1120),
+        selectedItemColor: const Color(0xFF3B82F6),
+        unselectedItemColor: const Color(0xFF64748B),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
           ),
-          SizedBox(height: 6),
-          Text(
-            "Analyze statements locally and safeguard your sensitive data with premium end-to-end sandbox protection.",
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.folder_outlined),
+            label: 'Locker',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_outlined),
+            label: 'Settings',
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildUploadZone() {
-    return Container(
-      width: double.infinity,
-      height: 130,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E2A4A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.blueAccent.withOpacity(0.3),
-          width: 1.5,
-        ),
-      ),
-      child: InkWell(
-        onTap: _pickPDFDocument,
-        borderRadius: BorderRadius.circular(16),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_upload_outlined,
-              color: Colors.blueAccent,
-              size: 40,
-            ),
-            SizedBox(height: 10),
-            Text(
-              "Tap to upload PDF statement",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class PlaceholderPage extends StatelessWidget {
+  final String title;
+  const PlaceholderPage({super.key, required this.title});
 
-  Widget _buildInsightMiniChart() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E2A4A),
-        borderRadius: BorderRadius.circular(16),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title, style: const TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF0B1120),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildInsightStat("Total Income", "LKR 145,000", Colors.greenAccent),
-          Container(width: 1, height: 50, color: Colors.white12),
-          _buildInsightStat("Total Expense", "LKR 68,200", Colors.redAccent),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInsightStat(String title, String amount, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(color: Colors.white54, fontSize: 13),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          amount,
-          style: TextStyle(
-            color: color,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0B1120), Color(0xFF151D2A)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildDocumentList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _uploadedDocs.length,
-      itemBuilder: (context, index) {
-        final doc = _uploadedDocs[index];
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E2A4A).withOpacity(0.6),
-            borderRadius: BorderRadius.circular(12),
+        child: Center(
+          child: Text(
+            '$title Page\n(Under Development)',
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 18),
           ),
-          child: ListTile(
-            leading: const Icon(
-              Icons.picture_as_pdf,
-              color: Colors.redAccent,
-              size: 30,
-            ),
-            title: Text(
-              doc['name'],
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-            subtitle: Text(
-              "${doc['type']} • ${doc['date']}",
-              style: const TextStyle(color: Colors.white54, fontSize: 12),
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

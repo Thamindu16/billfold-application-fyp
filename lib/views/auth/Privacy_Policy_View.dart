@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../dashboard/dashboard_view.dart';
 
 class PrivacyPolicyView extends StatefulWidget {
   const PrivacyPolicyView({super.key});
@@ -13,7 +14,11 @@ class _PrivacyPolicyViewState extends State<PrivacyPolicyView> {
 
   void _handleContinue() {
     if (_acceptedPolicy && _consentedLocalProcessing) {
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardView()),
+        (route) => false,
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
