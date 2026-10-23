@@ -31,6 +31,10 @@ dependencies:
   fl_chart: ^0.66.0
   file_selector: ^1.1.0
 
+dependency_overrides:
+  app_links: ^7.2.2
+  passkeys_windows: ^0.1.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

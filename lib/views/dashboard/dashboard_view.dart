@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:file_selector/file_selector.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -39,75 +40,192 @@ class _DashboardViewState extends State<DashboardView> {
   }
 
   void _navigateToPage(String pageTitle) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PlaceholderPage(title: pageTitle),
-      ),
-    );
+    if (pageTitle == 'Document locker' || pageTitle == 'Document Locker') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const DocumentLockerView()),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PlaceholderPage(title: pageTitle),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Customized Sidebar Drawer matching the image design exactly
       drawer: Drawer(
-        backgroundColor: const Color(0xFF151D2A),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+        backgroundColor: const Color(0xFF090D16),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // User Profile Section
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF253368),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'TP',
+                          style: TextStyle(
+                            color: Color(0xFF5B7FFF),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Thamindu Kavinda',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Premium tier plan',
+                          style: TextStyle(
+                            color: Color(0xFF2E8B57),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              child: Text(
-                'BILLFOLD Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              const Divider(color: Colors.white10, height: 1),
+              const SizedBox(height: 16),
+
+              // Menu Items
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  children: [
+                    // Dashboard Overview (Selected item styling)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF131B2E),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.home_outlined,
+                          color: Color(0xFF5B7FFF),
+                        ),
+                        title: const Text(
+                          'Dashboard overview',
+                          style: TextStyle(
+                            color: Color(0xFF8DA4FF),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          setState(() => _currentIndex = 0);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // AI Assistant Chat
+                    ListTile(
+                      leading: const Icon(Icons.search, color: Colors.white54),
+                      title: const Text(
+                        'AI assistant chat',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        _navigateToPage('AI assistant chat');
+                      },
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Document Locker
+                    ListTile(
+                      leading: const Icon(
+                        Icons.folder_outlined,
+                        color: Colors.white54,
+                      ),
+                      title: const Text(
+                        'Document locker',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() => _currentIndex = 1);
+                        _navigateToPage('Document locker');
+                      },
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Settings
+                    ListTile(
+                      leading: const Icon(
+                        Icons.access_time,
+                        color: Colors.white54,
+                      ),
+                      title: const Text(
+                        'Settings',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        setState(() => _currentIndex = 2);
+                        _navigateToPage('Settings');
+                      },
+                    ),
+                  ],
                 ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person_outline, color: Colors.white),
-              title: const Text(
-                'Profile',
-                style: TextStyle(color: Colors.white),
+
+              // Bottom Log Out Button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF111726),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.logout, color: Color(0xFFE57373)),
+                    title: const Text(
+                      'Log out',
+                      style: TextStyle(
+                        color: Color(0xFFE57373),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      // TODO: Implement actual user logout logic here
+                      _navigateToPage('Logged Out');
+                    },
+                  ),
+                ),
               ),
-              onTap: () {
-                Navigator.pop(context);
-                _navigateToPage('Profile');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder_outlined, color: Colors.white),
-              title: const Text(
-                'Locker',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentIndex = 1);
-                _navigateToPage('Document Locker');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined, color: Colors.white),
-              title: const Text(
-                'Settings',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                setState(() => _currentIndex = 2);
-                _navigateToPage('Settings');
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       body: Container(
@@ -503,8 +621,10 @@ class _DashboardViewState extends State<DashboardView> {
           setState(() {
             _currentIndex = index;
           });
-          if (index == 1) {
-            _navigateToPage('Document Locker');
+          if (index == 0) {
+            // Dashboard Overview
+          } else if (index == 1) {
+            _navigateToPage('Document locker');
           } else if (index == 2) {
             _navigateToPage('Settings');
           }
@@ -526,6 +646,255 @@ class _DashboardViewState extends State<DashboardView> {
             label: 'Settings',
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DocumentLockerView extends StatefulWidget {
+  const DocumentLockerView({super.key});
+
+  @override
+  State<DocumentLockerView> createState() => _DocumentLockerViewState();
+}
+
+class _DocumentLockerViewState extends State<DocumentLockerView> {
+  final TextEditingController _searchController = TextEditingController();
+
+  List<Map<String, String>> documents = [
+    {
+      'name': 'HNB_Statement_Jan.pdf',
+      'type': 'Bank statement',
+      'date': 'Today',
+    },
+    {
+      'name': 'BOC_Statement_Jan.pdf',
+      'type': 'Bank statement',
+      'date': '2 days ago',
+    },
+    {
+      'name': 'Peoples_Statement_Jan.pdf',
+      'type': 'Bank statement',
+      'date': '5 days ago',
+    },
+  ];
+
+  List<Map<String, String>> filteredDocuments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredDocuments = documents;
+    _searchController.addListener(_filterDocuments);
+  }
+
+  void _filterDocuments() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredDocuments = documents.where((doc) {
+        final name = doc['name']!.toLowerCase();
+        final type = doc['type']!.toLowerCase();
+        return name.contains(query) || type.contains(query);
+      }).toList();
+    });
+  }
+
+  Future<void> _addNewDocument() async {
+    final XFile? file = await openFile();
+    if (file != null) {
+      setState(() {
+        documents.add({
+          'name': file.name,
+          'type': 'Bank statement',
+          'date': 'Just now',
+        });
+        _filterDocuments();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B1120),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          'Document locker',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.lock_outline, color: Colors.white),
+                  ),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Local sandbox encryption active',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'All statements are encrypted at rest',
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF334155)),
+              ),
+              child: TextField(
+                controller: _searchController,
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Search documents',
+                  hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                  prefixIcon: Icon(Icons.search, color: Color(0xFF94A3B8)),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'All statements (${filteredDocuments.length})',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: filteredDocuments.length,
+                itemBuilder: (context, index) {
+                  final doc = filteredDocuments[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2563EB).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.description_outlined,
+                            color: Color(0xFF3B82F6),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc['name']!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${doc['type']} · ${doc['date']}',
+                                style: const TextStyle(
+                                  color: Color(0xFF94A3B8),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'Encrypted',
+                            style: TextStyle(
+                              color: Color(0xFF34D399),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addNewDocument,
+        backgroundColor: const Color(0xFF2563EB),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
