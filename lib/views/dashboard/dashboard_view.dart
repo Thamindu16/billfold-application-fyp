@@ -1,6 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
 
+void main() {
+  runApp(const BillfoldApp());
+}
+
+class BillfoldApp extends StatelessWidget {
+  const BillfoldApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Billfold',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0B1120),
+      ),
+      home: const DashboardView(),
+    );
+  }
+}
+
+class DocumentStore {
+  static final DocumentStore _instance = DocumentStore._internal();
+  factory DocumentStore() => _instance;
+  DocumentStore._internal();
+
+  final List<Map<String, String>> documents = [
+    {
+      'name': 'HNB_Statement_Jan.pdf',
+      'type': 'Bank statement',
+      'date': 'Today',
+      'status': 'Encrypted',
+    },
+    {
+      'name': 'Slip_Pay_2026.pdf',
+      'type': 'Payslip',
+      'date': 'Yesterday',
+      'status': 'Encrypted',
+    },
+    {
+      'name': 'BOC_Statement_Jan.pdf',
+      'type': 'Bank statement',
+      'date': '2 days ago',
+      'status': 'Encrypted',
+    },
+    {
+      'name': 'Peoples_Statement_Jan.pdf',
+      'type': 'Bank statement',
+      'date': '5 days ago',
+      'status': 'Encrypted',
+    },
+  ];
+
+  void addDocument(Map<String, String> doc) {
+    documents.insert(0, doc);
+  }
+}
+
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
 
@@ -14,57 +72,36 @@ class _DashboardViewState extends State<DashboardView> {
   double totalIncome = 145000.0;
   double totalExpense = 68200.0;
 
-  List<Map<String, String>> processedDocuments = [
-    {
-      'title': 'HNB_Statement_Jan.pdf',
-      'subtitle': 'Bank statement · Today',
-      'status': 'Encrypted',
-    },
-    {
-      'title': 'Slip_Pay_2026.pdf',
-      'subtitle': 'Payslip · Yesterday',
-      'status': 'Encrypted',
-    },
-  ];
-
-  void _onUploadPDF() {
-    setState(() {
-      totalIncome += 25000.0;
-      totalExpense += 5000.0;
-      processedDocuments.insert(0, {
-        'title': 'New_Statement_${DateTime.now().day}.pdf',
-        'subtitle': 'Bank statement · Just now',
-        'status': 'Encrypted',
+  Future<void> _onUploadPDF() async {
+    final XFile? file = await openFile();
+    if (file != null) {
+      setState(() {
+        totalIncome += 25000.0;
+        totalExpense += 5000.0;
+        DocumentStore().addDocument({
+          'name': file.name,
+          'type': 'Bank statement',
+          'date': 'Just now',
+          'status': 'Encrypted',
+        });
       });
-    });
+    }
   }
 
-  void _navigateToPage(String pageTitle) {
-    if (pageTitle == 'Document locker' || pageTitle == 'Document Locker') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const DocumentLockerView()),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PlaceholderPage(title: pageTitle),
-        ),
-      );
-    }
+  void _navigateToPage(Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 
   @override
   Widget build(BuildContext context) {
+    final docs = DocumentStore().documents;
+
     return Scaffold(
-      // Customized Sidebar Drawer matching the image design exactly
       drawer: Drawer(
         backgroundColor: const Color(0xFF090D16),
         child: SafeArea(
           child: Column(
             children: [
-              // User Profile Section
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Row(
@@ -115,13 +152,10 @@ class _DashboardViewState extends State<DashboardView> {
               ),
               const Divider(color: Colors.white10, height: 1),
               const SizedBox(height: 16),
-
-              // Menu Items
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   children: [
-                    // Dashboard Overview (Selected item styling)
                     Container(
                       decoration: BoxDecoration(
                         color: const Color(0xFF131B2E),
@@ -146,8 +180,6 @@ class _DashboardViewState extends State<DashboardView> {
                       ),
                     ),
                     const SizedBox(height: 6),
-
-                    // AI Assistant Chat
                     ListTile(
                       leading: const Icon(Icons.search, color: Colors.white54),
                       title: const Text(
@@ -156,12 +188,10 @@ class _DashboardViewState extends State<DashboardView> {
                       ),
                       onTap: () {
                         Navigator.pop(context);
-                        _navigateToPage('AI assistant chat');
+                        _navigateToPage(const AiChatView());
                       },
                     ),
                     const SizedBox(height: 6),
-
-                    // Document Locker
                     ListTile(
                       leading: const Icon(
                         Icons.folder_outlined,
@@ -174,12 +204,10 @@ class _DashboardViewState extends State<DashboardView> {
                       onTap: () {
                         Navigator.pop(context);
                         setState(() => _currentIndex = 1);
-                        _navigateToPage('Document locker');
+                        _navigateToPage(const DocumentLockerView());
                       },
                     ),
                     const SizedBox(height: 6),
-
-                    // Settings
                     ListTile(
                       leading: const Icon(
                         Icons.access_time,
@@ -192,14 +220,14 @@ class _DashboardViewState extends State<DashboardView> {
                       onTap: () {
                         Navigator.pop(context);
                         setState(() => _currentIndex = 2);
-                        _navigateToPage('Settings');
+                        _navigateToPage(
+                          const PlaceholderPage(title: 'Settings'),
+                        );
                       },
                     ),
                   ],
                 ),
               ),
-
-              // Bottom Log Out Button
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Container(
@@ -218,8 +246,9 @@ class _DashboardViewState extends State<DashboardView> {
                     ),
                     onTap: () {
                       Navigator.pop(context);
-                      // TODO: Implement actual user logout logic here
-                      _navigateToPage('Logged Out');
+                      _navigateToPage(
+                        const PlaceholderPage(title: 'Logged Out'),
+                      );
                     },
                   ),
                 ),
@@ -269,7 +298,9 @@ class _DashboardViewState extends State<DashboardView> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            _navigateToPage('Profile');
+                            _navigateToPage(
+                              const PlaceholderPage(title: 'Profile'),
+                            );
                           },
                           child: Container(
                             width: 40,
@@ -385,8 +416,8 @@ class _DashboardViewState extends State<DashboardView> {
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: const Color(0xFF334155)),
                         ),
-                        child: Column(
-                          children: const [
+                        child: const Column(
+                          children: [
                             Icon(
                               Icons.cloud_upload_outlined,
                               color: Color(0xFF3B82F6),
@@ -498,12 +529,14 @@ class _DashboardViewState extends State<DashboardView> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: processedDocuments.length,
+                      itemCount: docs.length > 2 ? 2 : docs.length,
                       itemBuilder: (context, index) {
-                        final doc = processedDocuments[index];
+                        final doc = docs[index];
                         return GestureDetector(
                           onTap: () {
-                            _navigateToPage('PDF Overview: ${doc['title']}');
+                            _navigateToPage(
+                              PdfOverviewView(title: doc['name']!),
+                            );
                           },
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
@@ -537,7 +570,7 @@ class _DashboardViewState extends State<DashboardView> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        doc['title']!,
+                                        doc['name']!,
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
@@ -546,7 +579,7 @@ class _DashboardViewState extends State<DashboardView> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        doc['subtitle']!,
+                                        '${doc['type']} · ${doc['date']}',
                                         style: const TextStyle(
                                           color: Color(0xFF94A3B8),
                                           fontSize: 12,
@@ -567,7 +600,7 @@ class _DashboardViewState extends State<DashboardView> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
-                                    doc['status']!,
+                                    doc['status'] ?? 'Encrypted',
                                     style: const TextStyle(
                                       color: Color(0xFF34D399),
                                       fontSize: 12,
@@ -592,7 +625,7 @@ class _DashboardViewState extends State<DashboardView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         onPressed: () {
-          _navigateToPage('AI Assistant Chat');
+          _navigateToPage(const AiChatView());
         },
         child: Container(
           width: 56,
@@ -622,11 +655,11 @@ class _DashboardViewState extends State<DashboardView> {
             _currentIndex = index;
           });
           if (index == 0) {
-            // Dashboard Overview
+            // Dashboard
           } else if (index == 1) {
-            _navigateToPage('Document locker');
+            _navigateToPage(const DocumentLockerView());
           } else if (index == 2) {
-            _navigateToPage('Settings');
+            _navigateToPage(const PlaceholderPage(title: 'Settings'));
           }
         },
         backgroundColor: const Color(0xFF0B1120),
@@ -660,38 +693,19 @@ class DocumentLockerView extends StatefulWidget {
 
 class _DocumentLockerViewState extends State<DocumentLockerView> {
   final TextEditingController _searchController = TextEditingController();
-
-  List<Map<String, String>> documents = [
-    {
-      'name': 'HNB_Statement_Jan.pdf',
-      'type': 'Bank statement',
-      'date': 'Today',
-    },
-    {
-      'name': 'BOC_Statement_Jan.pdf',
-      'type': 'Bank statement',
-      'date': '2 days ago',
-    },
-    {
-      'name': 'Peoples_Statement_Jan.pdf',
-      'type': 'Bank statement',
-      'date': '5 days ago',
-    },
-  ];
-
   List<Map<String, String>> filteredDocuments = [];
 
   @override
   void initState() {
     super.initState();
-    filteredDocuments = documents;
+    filteredDocuments = DocumentStore().documents;
     _searchController.addListener(_filterDocuments);
   }
 
   void _filterDocuments() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      filteredDocuments = documents.where((doc) {
+      filteredDocuments = DocumentStore().documents.where((doc) {
         final name = doc['name']!.toLowerCase();
         final type = doc['type']!.toLowerCase();
         return name.contains(query) || type.contains(query);
@@ -703,10 +717,11 @@ class _DocumentLockerViewState extends State<DocumentLockerView> {
     final XFile? file = await openFile();
     if (file != null) {
       setState(() {
-        documents.add({
+        DocumentStore().addDocument({
           'name': file.name,
           'type': 'Bank statement',
           'date': 'Just now',
+          'status': 'Encrypted',
         });
         _filterDocuments();
       });
@@ -819,70 +834,81 @@ class _DocumentLockerViewState extends State<DocumentLockerView> {
                 itemCount: filteredDocuments.length,
                 itemBuilder: (context, index) {
                   final doc = filteredDocuments[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFF334155)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.description_outlined,
-                            color: Color(0xFF3B82F6),
-                          ),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              PdfOverviewView(title: doc['name']!),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                doc['name']!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${doc['type']} · ${doc['date']}',
-                                style: const TextStyle(
-                                  color: Color(0xFF94A3B8),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'Encrypted',
-                            style: TextStyle(
-                              color: Color(0xFF34D399),
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFF334155)),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.description_outlined,
+                              color: Color(0xFF3B82F6),
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  doc['name']!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${doc['type']} · ${doc['date']}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              doc['status'] ?? 'Encrypted',
+                              style: const TextStyle(
+                                color: Color(0xFF34D399),
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -895,6 +921,683 @@ class _DocumentLockerViewState extends State<DocumentLockerView> {
         onPressed: _addNewDocument,
         backgroundColor: const Color(0xFF2563EB),
         child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+}
+
+class PdfOverviewView extends StatelessWidget {
+  final String title;
+
+  const PdfOverviewView({super.key, this.title = 'HNB_Statement_Jan.pdf'});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B1120),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            const Text(
+              'Encrypted · Processed today',
+              style: TextStyle(color: Color(0xFF34D399), fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'AI summary',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF334155)),
+              ),
+              child: RichText(
+                text: const TextSpan(
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                  children: [
+                    TextSpan(text: 'This statement shows a total income of '),
+                    TextSpan(
+                      text: 'LKR 145,000',
+                      style: TextStyle(
+                        color: Color(0xFF4ADE80),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(text: ' and total expenses of '),
+                    TextSpan(
+                      text: 'LKR 68,200',
+                      style: TextStyle(
+                        color: Color(0xFFF87171),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text:
+                          ' across 5 transactions, with the largest outflow being rent.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total income',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'LKR 145,000',
+                          style: TextStyle(
+                            color: Color(0xFF4ADE80),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total expense',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 12,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'LKR 68,200',
+                          style: TextStyle(
+                            color: Color(0xFFF87171),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Transactions',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF334155)),
+              ),
+              child: Column(
+                children: [
+                  _buildTransactionTile(
+                    'Electricity bill',
+                    '14 Jan 2026',
+                    '-4,520',
+                    isExpense: true,
+                  ),
+                  const Divider(color: Color(0xFF334155), height: 1),
+                  _buildTransactionTile(
+                    'Groceries',
+                    '10 Jan 2026',
+                    '-12,300',
+                    isExpense: true,
+                  ),
+                  const Divider(color: Color(0xFF334155), height: 1),
+                  _buildTransactionTile(
+                    'Rent',
+                    '3 Jan 2026',
+                    '-35,000',
+                    isExpense: true,
+                  ),
+                  const Divider(color: Color(0xFF334155), height: 1),
+                  _buildTransactionTile(
+                    'Salary deposit',
+                    '1 Jan 2026',
+                    '+145,000',
+                    isExpense: false,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF334155)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AiChatView()),
+                  );
+                },
+                child: const Text(
+                  'Ask AI about this statement',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionTile(
+    String title,
+    String date,
+    String amount, {
+    required bool isExpense,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                date,
+                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+              ),
+            ],
+          ),
+          Text(
+            amount,
+            style: TextStyle(
+              color: isExpense
+                  ? const Color(0xFFF87171)
+                  : const Color(0xFF4ADE80),
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AiChatView extends StatefulWidget {
+  const AiChatView({super.key});
+
+  @override
+  State<AiChatView> createState() => _AiChatViewState();
+}
+
+class _AiChatViewState extends State<AiChatView> {
+  final TextEditingController _messageController = TextEditingController();
+
+  void _showCitationModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF131B2E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Source',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white54),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.description_outlined,
+                      color: Color(0xFF3B82F6),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HNB_Statement_Jan.pdf',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Page 2',
+                        style: TextStyle(
+                          color: Color(0xFF94A3B8),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF3B82F6).withOpacity(0.3),
+                  ),
+                ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Electricity bill',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text(
+                          'Payment: ',
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                        ),
+                        Text(
+                          'LKR 4,520',
+                          style: TextStyle(
+                            color: Color(0xFF4ADE80),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(
+                          'Date: ',
+                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                        ),
+                        Text(
+                          '14/01/2026',
+                          style: TextStyle(
+                            color: Color(0xFF4ADE80),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5B7FFF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PdfOverviewView(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'View full document',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B1120),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'AI financial assistant',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            Text(
+              'Local AI · Privacy guaranteed',
+              style: TextStyle(color: Color(0xFF34D399), fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    constraints: const BoxConstraints(maxWidth: 300),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text(
+                      'Hi! I\'ve analyzed your uploaded documents. Ask me anything about your bank statements or payslips.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Text(
+                      'Show my total expenses for Jan',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RichText(
+                          text: const TextSpan(
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              height: 1.4,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Your total expenses for January were ',
+                              ),
+                              TextSpan(
+                                text: 'LKR 68,200',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              TextSpan(
+                                text:
+                                    ', mainly electricity, groceries and rent payments.',
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: () => _showCitationModal(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.description_outlined,
+                                  color: Color(0xFF5B7FFF),
+                                  size: 14,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  'View citation',
+                                  style: TextStyle(
+                                    color: Color(0xFF8DA4FF),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.thumb_up_alt_outlined,
+                                color: Colors.white54,
+                                size: 18,
+                              ),
+                              onPressed: () {},
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.thumb_down_alt_outlined,
+                                color: Colors.white54,
+                                size: 18,
+                              ),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: const Color(0xFF334155)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        hintText: 'Ask about your statements...',
+                        hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF5B7FFF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_upward,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        _messageController.clear();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
