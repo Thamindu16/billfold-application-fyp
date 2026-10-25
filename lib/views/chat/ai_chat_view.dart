@@ -1,8 +1,30 @@
 import 'package:flutter/material.dart';
 import '../document/pdf_overview_view.dart';
 
+class ChatMessage {
+  final String text;
+  final bool isUser;
+  final bool hasCitation;
+  final String? citationTitle;
+  final String? citationPage;
+  final String? citationDetailTitle;
+  final String? citationPayment;
+  final String? citationDate;
+
+  ChatMessage({
+    required this.text,
+    required this.isUser,
+    this.hasCitation = false,
+    this.citationTitle,
+    this.citationPage,
+    this.citationDetailTitle,
+    this.citationPayment,
+    this.citationDate,
+  });
+}
+
 class AiChatView extends StatefulWidget {
-  const AiChatView({super.key});
+  AiChatView({super.key});
 
   @override
   State<AiChatView> createState() => _AiChatViewState();
@@ -10,8 +32,127 @@ class AiChatView extends StatefulWidget {
 
 class _AiChatViewState extends State<AiChatView> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
-  void _showCitationModal(BuildContext context) {
+  final List<ChatMessage> _messages = [
+    ChatMessage(
+      text:
+          'Hi! I\'ve analyzed your uploaded documents. Ask me anything about your bank statements or payslips.',
+      isUser: false,
+    ),
+  ];
+
+  void _sendMessage() {
+    final text = _messageController.text.trim();
+    if (text.isEmpty) return;
+
+    _messageController.clear();
+
+    setState(() {
+      _messages.add(ChatMessage(text: text, isUser: true));
+    });
+
+    _scrollToBottom();
+
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (!mounted) return;
+
+      String replyText =
+          'I have processed your query based on your secure vault records.';
+      bool showCitation = false;
+      String docTitle = 'HNB_Statement_Jan.pdf';
+      String pageNum = 'Page 2';
+      String detailTitle = 'Transaction record';
+      String paymentAmount = 'LKR 0';
+      String txDate = '14/01/2026';
+
+      final lowerQuery = text.toLowerCase();
+
+      if (lowerQuery.contains('expense') ||
+          lowerQuery.contains('total') ||
+          lowerQuery.contains('spend')) {
+        replyText =
+            'Your total expenses for January were LKR 68,200, mainly covering electricity, groceries, and rent payments.';
+        showCitation = true;
+        docTitle = 'HNB_Statement_Jan.pdf';
+        pageNum = 'Page 2';
+        detailTitle = 'Electricity bill';
+        paymentAmount = 'LKR 4,520';
+        txDate = '14/01/2026';
+      } else if (lowerQuery.contains('income') ||
+          lowerQuery.contains('salary') ||
+          lowerQuery.contains('pay')) {
+        replyText =
+            'Your total income recorded for January is LKR 145,000 including your primary salary deposit.';
+        showCitation = true;
+        docTitle = 'Slip_Pay_2026.pdf';
+        pageNum = 'Page 1';
+        detailTitle = 'Salary deposit';
+        paymentAmount = '+LKR 145,000';
+        txDate = '01/01/2026';
+      } else if (lowerQuery.contains('pdf') ||
+          lowerQuery.contains('statement') ||
+          lowerQuery.contains('show') ||
+          lowerQuery.contains('file') ||
+          lowerQuery.contains('view')) {
+        replyText =
+            'Here is the requested statement document details. You can review the full document directly using the citation below.';
+        showCitation = true;
+        docTitle = 'HNB_Statement_Jan.pdf';
+        pageNum = 'Page 1';
+        detailTitle = 'HNB Bank Statement Jan 2026';
+        paymentAmount = 'Processed';
+        txDate = 'Today';
+      } else {
+        replyText =
+            'I found relevant details in your vault regarding "$text". You can open the full statement to review all breakdowns.';
+        showCitation = true;
+        docTitle = 'HNB_Statement_Jan.pdf';
+        pageNum = 'Page 1';
+        detailTitle = 'General Vault Record';
+        paymentAmount = 'Matched';
+        txDate = 'Today';
+      }
+
+      setState(() {
+        _messages.add(
+          ChatMessage(
+            text: replyText,
+            isUser: false,
+            hasCitation: showCitation,
+            citationTitle: docTitle,
+            citationPage: pageNum,
+            citationDetailTitle: detailTitle,
+            citationPayment: paymentAmount,
+            citationDate: txDate,
+          ),
+        );
+      });
+
+      _scrollToBottom();
+    });
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void _showCitationModal(
+    BuildContext context, {
+    required String title,
+    required String page,
+    required String detailTitle,
+    required String payment,
+    required String date,
+  }) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF131B2E),
@@ -57,20 +198,20 @@ class _AiChatViewState extends State<AiChatView> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'HNB_Statement_Jan.pdf',
-                        style: TextStyle(
+                        title,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
                       ),
                       Text(
-                        'Page 2',
-                        style: TextStyle(
+                        page,
+                        style: const TextStyle(
                           color: Color(0xFF94A3B8),
                           fontSize: 12,
                         ),
@@ -90,26 +231,26 @@ class _AiChatViewState extends State<AiChatView> {
                     color: const Color(0xFF3B82F6).withOpacity(0.3),
                   ),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Electricity bill',
-                      style: TextStyle(
+                      detailTitle,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
-                        Text(
-                          'Payment: ',
+                        const Text(
+                          'Info: ',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                         Text(
-                          'LKR 4,520',
-                          style: TextStyle(
+                          payment,
+                          style: const TextStyle(
                             color: Color(0xFF4ADE80),
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -117,16 +258,16 @@ class _AiChatViewState extends State<AiChatView> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
+                        const Text(
                           'Date: ',
                           style: TextStyle(color: Colors.white70, fontSize: 13),
                         ),
                         Text(
-                          '14/01/2026',
-                          style: TextStyle(
+                          date,
+                          style: const TextStyle(
                             color: Color(0xFF4ADE80),
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -153,7 +294,7 @@ class _AiChatViewState extends State<AiChatView> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const PdfOverviewView(),
+                        builder: (context) => PdfOverviewView(title: title),
                       ),
                     );
                   },
@@ -205,147 +346,96 @@ class _AiChatViewState extends State<AiChatView> {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
+            child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 12.0,
               ),
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return Align(
+                  alignment: message.isUser
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(16),
-                    constraints: const BoxConstraints(maxWidth: 300),
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.8,
+                    ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Text(
-                      'Hi! I\'ve analyzed your uploaded documents. Ask me anything about your bank statements or payslips.',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Text(
-                      'Show my total expenses for Jan',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(16),
-                    constraints: const BoxConstraints(maxWidth: 320),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: message.isUser ? null : const Color(0xFF1E293B),
+                      gradient: message.isUser
+                          ? const LinearGradient(
+                              colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
+                            )
+                          : null,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              height: 1.4,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Your total expenses for January were ',
-                              ),
-                              TextSpan(
-                                text: 'LKR 68,200',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              TextSpan(
-                                text:
-                                    ', mainly electricity, groceries and rent payments.',
-                              ),
-                            ],
+                        Text(
+                          message.text,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            height: 1.4,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        InkWell(
-                          onTap: () => _showCitationModal(context),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                        if (message.hasCitation) ...[
+                          const SizedBox(height: 12),
+                          InkWell(
+                            onTap: () => _showCitationModal(
+                              context,
+                              title:
+                                  message.citationTitle ??
+                                  'HNB_Statement_Jan.pdf',
+                              page: message.citationPage ?? 'Page 2',
+                              detailTitle:
+                                  message.citationDetailTitle ??
+                                  'Transaction record',
+                              payment: message.citationPayment ?? 'LKR 0',
+                              date: message.citationDate ?? '14/01/2026',
                             ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.description_outlined,
-                                  color: Color(0xFF5B7FFF),
-                                  size: 14,
-                                ),
-                                SizedBox(width: 6),
-                                Text(
-                                  'View citation',
-                                  style: TextStyle(
-                                    color: Color(0xFF8DA4FF),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2563EB).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.description_outlined,
+                                    color: Color(0xFF5B7FFF),
+                                    size: 14,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'View citation',
+                                    style: TextStyle(
+                                      color: Color(0xFF8DA4FF),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.thumb_up_alt_outlined,
-                                color: Colors.white54,
-                                size: 18,
-                              ),
-                              onPressed: () {},
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.thumb_down_alt_outlined,
-                                color: Colors.white54,
-                                size: 18,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ],
-                        ),
+                        ],
                       ],
                     ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
           Padding(
@@ -363,6 +453,7 @@ class _AiChatViewState extends State<AiChatView> {
                     child: TextField(
                       controller: _messageController,
                       style: const TextStyle(color: Colors.white),
+                      onSubmitted: (_) => _sendMessage(),
                       decoration: const InputDecoration(
                         hintText: 'Ask about your statements...',
                         hintStyle: TextStyle(color: Color(0xFF94A3B8)),
@@ -383,9 +474,7 @@ class _AiChatViewState extends State<AiChatView> {
                         color: Colors.white,
                         size: 20,
                       ),
-                      onPressed: () {
-                        _messageController.clear();
-                      },
+                      onPressed: _sendMessage,
                     ),
                   ),
                 ],
