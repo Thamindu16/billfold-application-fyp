@@ -218,7 +218,7 @@ class PdfOverviewView extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AiChatView()),
+                    MaterialPageRoute(builder: (context) => AiChatView()),
                   );
                 },
                 child: const Text(
