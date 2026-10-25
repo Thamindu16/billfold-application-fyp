@@ -1,4 +1,4 @@
-# fintellect
+# Billfold
 
 A new Flutter project.
 
