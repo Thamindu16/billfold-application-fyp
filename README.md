@@ -116,3 +116,7 @@ The current theme value lives in the dashboard's state and is passed down to chi
 Please make sure `flutter analyze` shows no errors before you open a pull request, and that new pages support both light and dark mode.
 
 ---
+
+## Author
+
+Thamindu Kavinda
