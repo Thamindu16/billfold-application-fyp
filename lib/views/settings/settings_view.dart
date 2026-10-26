@@ -1,180 +1,60 @@
 import 'package:flutter/material.dart';
+import 'privacy_security/privacy_security_view.dart';
+import 'notifications_view.dart';
+import 'language_view.dart';
+import 'currency_view.dart';
+import 'about_view.dart';
+import '../profile/profile_view.dart';
 
-// 1. My Profile View
-class ProfileView extends StatelessWidget {
-  const ProfileView({super.key});
+class SettingsView extends StatefulWidget {
+  final Function(bool) onThemeChanged;
+  final bool isDarkMode;
+
+  const SettingsView({
+    super.key,
+    required this.onThemeChanged,
+    required this.isDarkMode,
+  });
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('My profile', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white70),
-      ),
-      body: const Center(
-        child: Text(
-          'Profile details and edits',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ),
-    );
-  }
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
-// 2. Privacy & Security View
-class PrivacySecurityView extends StatelessWidget {
-  const PrivacySecurityView({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text(
-          'Privacy & security',
-          style: TextStyle(color: Colors.white),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white70),
-      ),
-      body: const Center(
-        child: Text(
-          'Manage your security and privacy settings',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// 3. Notifications View
-class NotificationsView extends StatelessWidget {
-  const NotificationsView({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text(
-          'Notifications',
-          style: TextStyle(color: Colors.white),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white70),
-      ),
-      body: const Center(
-        child: Text(
-          'Notification preferences',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// 4. Language View
-class LanguageView extends StatelessWidget {
-  const LanguageView({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Language', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white70),
-      ),
-      body: const Center(
-        child: Text(
-          'Select preferred language (English)',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// 5. Currency View
-class CurrencyView extends StatelessWidget {
-  const CurrencyView({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Currency', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white70),
-      ),
-      body: const Center(
-        child: Text(
-          'Currency settings (Default: LKR)',
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// 6. About / App Version View
-class AboutView extends StatelessWidget {
-  const AboutView({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text(
-          'About / app version',
-          style: TextStyle(color: Colors.white),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white70),
-      ),
-      body: const Center(
-        child: Text(
-          'BILLFOLD App Version 1.0.0\nSecure Financial Hub',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      ),
-    );
-  }
-}
-
-// Main Settings View
-class SettingsView extends StatelessWidget {
-  const SettingsView({super.key});
+class _SettingsViewState extends State<SettingsView> {
+  late bool _isDark = widget.isDarkMode;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B1120),
+      backgroundColor: _isDark ? const Color(0xFF0B1120) : Colors.grey[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white70),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: _isDark ? Colors.white70 : Colors.black87,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Settings',
           style: TextStyle(
-            color: Colors.white,
+            color: _isDark ? Colors.white : Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Account',
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: _isDark ? const Color(0xFF94A3B8) : Colors.grey[600],
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -182,58 +62,71 @@ class SettingsView extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2E),
+                color: _isDark ? const Color(0xFF131B2E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                border: Border.all(
+                  color: _isDark
+                      ? const Color(0xFF1E293B)
+                      : Colors.grey.shade300,
+                ),
               ),
               child: Column(
                 children: [
-                  _buildSettingsTile(
-                    icon: Icons.person_outline,
-                    title: 'My profile',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfileView(),
-                        ),
-                      );
-                    },
+                  _buildTile(
+                    Icons.person_outline,
+                    'My profile',
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfileView(),
+                      ),
+                    ),
+                    _isDark,
                   ),
-                  const Divider(height: 1, color: Color(0xFF1E293B)),
-                  _buildSettingsTile(
-                    icon: Icons.lock_outline,
-                    title: 'Privacy & security',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PrivacySecurityView(),
-                        ),
-                      );
-                    },
+                  Divider(
+                    height: 1,
+                    color: _isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.grey.shade200,
                   ),
-                  const Divider(height: 1, color: Color(0xFF1E293B)),
-                  _buildSettingsTile(
-                    icon: Icons.notifications_none,
-                    title: 'Notifications',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationsView(),
-                        ),
-                      );
-                    },
+                  _buildTile(
+                    Icons.lock_outline,
+                    'Privacy & security',
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            PrivacySecurityView(isDarkMode: _isDark),
+                      ),
+                    ),
+                    _isDark,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: _isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.grey.shade200,
+                  ),
+                  _buildTile(
+                    Icons.notifications_none,
+                    'Notifications',
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            NotificationsView(isDarkMode: _isDark),
+                      ),
+                    ),
+                    _isDark,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'General',
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: _isDark ? const Color(0xFF94A3B8) : Colors.grey[600],
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -241,51 +134,98 @@ class SettingsView extends StatelessWidget {
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF131B2E),
+                color: _isDark ? const Color(0xFF131B2E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF1E293B)),
+                border: Border.all(
+                  color: _isDark
+                      ? const Color(0xFF1E293B)
+                      : Colors.grey.shade300,
+                ),
               ),
               child: Column(
                 children: [
-                  _buildSettingsTile(
-                    icon: Icons.language,
-                    title: 'Language',
-                    trailingText: 'English',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LanguageView(),
-                        ),
-                      );
-                    },
+                  _buildSubTile(
+                    Icons.language,
+                    'Language',
+                    'English',
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LanguageView(isDarkMode: _isDark),
+                      ),
+                    ),
+                    _isDark,
                   ),
-                  const Divider(height: 1, color: Color(0xFF1E293B)),
-                  _buildSettingsTile(
-                    icon: Icons.wb_sunny_outlined,
-                    title: 'Currency',
-                    trailingText: 'LKR',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CurrencyView(),
-                        ),
-                      );
-                    },
+                  Divider(
+                    height: 1,
+                    color: _isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.grey.shade200,
                   ),
-                  const Divider(height: 1, color: Color(0xFF1E293B)),
-                  _buildSettingsTile(
-                    icon: Icons.access_time_outlined,
-                    title: 'About / app version',
-                    trailingText: '1.0.0',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AboutView(),
-                        ),
-                      );
+                  _buildSubTile(
+                    Icons.currency_exchange,
+                    'Currency',
+                    'LKR',
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CurrencyView(isDarkMode: _isDark),
+                      ),
+                    ),
+                    _isDark,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: _isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.grey.shade200,
+                  ),
+                  _buildSubTile(
+                    Icons.access_time_outlined,
+                    'About / app version',
+                    '1.0.0',
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AboutView(isDarkMode: _isDark),
+                      ),
+                    ),
+                    _isDark,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: _isDark
+                        ? const Color(0xFF1E293B)
+                        : Colors.grey.shade200,
+                  ),
+                  SwitchListTile(
+                    secondary: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: _isDark
+                            ? const Color(0xFF1E293B)
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.wb_sunny_outlined,
+                        color: Color(0xFF3B82F6),
+                        size: 20,
+                      ),
+                    ),
+                    title: Text(
+                      'Dark Mode',
+                      style: TextStyle(
+                        color: _isDark ? Colors.white : Colors.black87,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    value: _isDark,
+                    activeColor: const Color(0xFF3B82F6),
+                    onChanged: (val) {
+                      setState(() => _isDark = val);
+                      widget.onThemeChanged(val);
                     },
                   ),
                 ],
@@ -301,39 +241,12 @@ class SettingsView extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  backgroundColor: const Color(0xFF131B2E),
+                  backgroundColor: _isDark
+                      ? const Color(0xFF131B2E)
+                      : Colors.white,
                 ),
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      backgroundColor: const Color(0xFF131B2E),
-                      title: const Text(
-                        'Log out',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      content: const Text(
-                        'Are you sure you want to log out?',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(color: Color(0xFF94A3B8)),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            'Log out',
-                            style: TextStyle(color: Colors.redAccent),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  Navigator.pop(context);
                 },
                 child: const Text(
                   'Log out',
@@ -351,26 +264,59 @@ class SettingsView extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    String? trailingText,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildTile(
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+    bool isDark,
+  ) {
     return ListTile(
       onTap: onTap,
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: isDark ? const Color(0xFF1E293B) : Colors.grey[200],
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: const Color(0xFF3B82F6), size: 20),
       ),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        color: Color(0xFF64748B),
+        size: 14,
+      ),
+    );
+  }
+
+  Widget _buildSubTile(
+    IconData icon,
+    String title,
+    String trailingText,
+    VoidCallback onTap,
+    bool isDark,
+  ) {
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: const Color(0xFF3B82F6), size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black87,
           fontSize: 15,
           fontWeight: FontWeight.w500,
         ),
@@ -378,12 +324,11 @@ class SettingsView extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (trailingText != null)
-            Text(
-              trailingText,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-            ),
-          if (trailingText != null) const SizedBox(width: 8),
+          Text(
+            trailingText,
+            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+          ),
+          const SizedBox(width: 8),
           const Icon(
             Icons.arrow_forward_ios,
             color: Color(0xFF64748B),
