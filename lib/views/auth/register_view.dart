@@ -11,10 +11,13 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   final _formKey = GlobalKey<FormState>();
+  final _confirmFieldKey = GlobalKey<FormFieldState<String>>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   void _handleRegister() {
     if (_formKey.currentState!.validate()) {
@@ -120,10 +123,21 @@ class _RegisterViewState extends State<RegisterView> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _nameController,
+                      textCapitalization: TextCapitalization.words,
                       style: const TextStyle(color: Colors.white),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        final name = value?.trim() ?? '';
+                        if (name.isEmpty) {
                           return 'Please enter your full name';
+                        }
+                        if (name.length < 2) {
+                          return 'Name must be at least 2 characters';
+                        }
+                        if (!RegExp(
+                          r"^[\p{L}][\p{L}\s.'\-]*$",
+                          unicode: true,
+                        ).hasMatch(name)) {
+                          return 'Name can only contain letters and spaces';
                         }
                         return null;
                       },
@@ -184,14 +198,16 @@ class _RegisterViewState extends State<RegisterView> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       style: const TextStyle(color: Colors.white),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        final email = value?.trim() ?? '';
+                        if (email.isEmpty) {
                           return 'Please enter your email address';
                         }
                         if (!RegExp(
                           r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        ).hasMatch(value)) {
+                        ).hasMatch(email)) {
                           return 'Please enter a valid email address';
                         }
                         return null;
@@ -253,14 +269,32 @@ class _RegisterViewState extends State<RegisterView> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: _obscurePassword,
                       style: const TextStyle(color: Colors.white),
+                      onChanged: (_) {
+                        // Re-check confirm password when password changes
+                        if (_confirmPasswordController.text.isNotEmpty) {
+                          _confirmFieldKey.currentState?.validate();
+                        }
+                      },
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return 'Please enter your password';
                         }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
+                        if (value.length < 8) {
+                          return 'Password must be at least 8 characters';
+                        }
+                        if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                          return 'Password must contain an uppercase letter';
+                        }
+                        if (!RegExp(r'[a-z]').hasMatch(value)) {
+                          return 'Password must contain a lowercase letter';
+                        }
+                        if (!RegExp(r'[0-9]').hasMatch(value)) {
+                          return 'Password must contain a number';
+                        }
+                        if (!RegExp(r'[^A-Za-z0-9]').hasMatch(value)) {
+                          return 'Password must contain a symbol';
                         }
                         return null;
                       },
@@ -274,6 +308,20 @@ class _RegisterViewState extends State<RegisterView> {
                           Icons.lock_outline,
                           color: Color(0xFF64748B),
                           size: 20,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: const Color(0xFF64748B),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
                         ),
                         filled: true,
                         fillColor: const Color(0xFF1E293B),
@@ -320,11 +368,12 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
+                      key: _confirmFieldKey,
                       controller: _confirmPasswordController,
-                      obscureText: true,
+                      obscureText: _obscureConfirmPassword,
                       style: const TextStyle(color: Colors.white),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
+                        if (value == null || value.isEmpty) {
                           return 'Please confirm your password';
                         }
                         if (value != _passwordController.text) {
@@ -342,6 +391,21 @@ class _RegisterViewState extends State<RegisterView> {
                           Icons.lock_outline,
                           color: Color(0xFF64748B),
                           size: 20,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: const Color(0xFF64748B),
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword =
+                                  !_obscureConfirmPassword;
+                            });
+                          },
                         ),
                         filled: true,
                         fillColor: const Color(0xFF1E293B),
