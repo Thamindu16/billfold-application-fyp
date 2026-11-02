@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image_picker: ^1.0.7
 
   # UI Styling & Fonts
   cupertino_icons: ^1.0.8
